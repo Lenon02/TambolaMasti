@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#17142b">
+<title>Tambola Masti</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#17142b;color:#fff;font-family:system-ui,Arial,sans-serif;padding:18px}
+main{max-width:650px;margin:auto}.brand{text-align:center;color:#ffd166;font-weight:800;font-size:28px;margin:8px 0 3px}.sub{text-align:center;color:#c9c5dc;margin-bottom:18px}
+.current{background:linear-gradient(135deg,#6d3be8,#b13fe8);border-radius:22px;text-align:center;padding:18px;margin:12px 0}
+.current small{display:block;opacity:.85}.number{font-size:76px;font-weight:900;line-height:1.2;min-height:92px}
+.controls{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0}
+button{border:0;border-radius:13px;padding:14px 10px;font-size:16px;font-weight:750;background:#ffd166;color:#211b35}
+button.secondary{background:#332e4b;color:white;border:1px solid #625b7b}button:disabled{opacity:.4}
+.settings{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:12px 0;color:#ddd}
+select{background:#332e4b;color:white;border:1px solid #625b7b;border-radius:10px;padding:9px}
+h3{margin:22px 0 10px}.board{display:grid;grid-template-columns:repeat(10,1fr);gap:5px}
+.cell{background:#302b45;border-radius:7px;text-align:center;padding:8px 0;font-size:13px;color:#c9c5dc}
+.cell.called{background:#ffd166;color:#211b35;font-weight:900}
+.history{display:flex;gap:7px;flex-wrap:wrap}.chip{background:#332e4b;border-radius:20px;padding:7px 11px}
+.note{color:#bcb6d2;font-size:12px;line-height:1.5;margin-top:18px}
+</style>
+</head>
+<body><main>
+<div class="brand">🎤 TAMBOLA MASTI</div><div class="sub">Manipuri RJ Edition</div>
+<section class="current"><small>NOW CALLING</small><div class="number" id="current">—</div><div id="count">0 of 90 numbers called</div></section>
+<div class="controls">
+<button id="next">▶ Call Number</button><button class="secondary" id="repeat">🔊 Repeat</button>
+<button class="secondary" id="pause">⏸ Stop Voice</button><button class="secondary" id="reset">↻ New Game</button>
+</div>
+<div class="settings"><label for="lang">Voice language</label><select id="lang"><option value="mni-IN">Manipuri (if available)</option><option value="en-IN">English (India)</option><option value="hi-IN">Hindi</option></select></div>
+<h3>Number Board</h3><div class="board" id="board"></div>
+<h3>Calling History</h3><div class="history" id="history">No numbers called yet</div>
+<p class="note">Voice availability depends on the voices installed on your Android phone. If Manipuri is not available, choose English or Hindi. Keep this app open while playing.</p>
+</main>
+<script>
+const called=[];let current=null;
+const board=document.getElementById('board'),history=document.getElementById('history');
+for(let n=1;n<=90;n++){const d=document.createElement('div');d.className='cell';d.id='n'+n;d.textContent=n;board.appendChild(d)}
+function speak(n){if(!n)return;if(!('speechSynthesis'in window)){alert('Voice playback is not supported on this device.');return}
+speechSynthesis.cancel();const u=new SpeechSynthesisUtterance('Number '+n);u.lang=document.getElementById('lang').value;speechSynthesis.speak(u)}
+function update(){document.getElementById('current').textContent=current??'—';document.getElementById('count').textContent=called.length+' of 90 numbers called';history.innerHTML=called.length?called.slice().reverse().map(n=>'<span class="chip">'+n+'</span>').join(''):'No numbers called yet';for(let n=1;n<=90;n++)document.getElementById('n'+n).classList.toggle('called',called.includes(n));document.getElementById('next').disabled=called.length===90}
+document.getElementById('next').onclick=()=>{if(called.length===90)return;const left=Array.from({length:90},(_,i)=>i+1).filter(n=>!called.includes(n));current=left[Math.floor(Math.random()*left.length)];called.push(current);update();speak(current)};
+document.getElementById('repeat').onclick=()=>speak(current);
+document.getElementById('pause').onclick=()=>speechSynthesis.cancel();
+document.getElementById('reset').onclick=()=>{if(confirm('Start a new game and clear all called numbers?')){speechSynthesis.cancel();called.length=0;current=null;update()}};
+update();
+</script></body></html>
